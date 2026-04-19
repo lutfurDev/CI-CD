@@ -14,6 +14,8 @@ jobs:
   build-apk:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
 
     steps:
       - name: Checkout code
@@ -54,9 +56,7 @@ jobs:
           if-no-files-found: error
 
       - name: Notify Teams
-        if: ${{ success() && secrets.TEAMS_WEBHOOK_URL != '' }}
-        env:
-          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        if: ${{ success() && env.TEAMS_WEBHOOK_URL != '' }}
         run: |
           RUN_URL="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           COMMIT_SHA="${{ github.sha }}"
@@ -74,6 +74,5 @@ jobs:
             "$TEAMS_WEBHOOK_URL"
 
       - name: Teams webhook not configured
-        if: ${{ success() && secrets.TEAMS_WEBHOOK_URL == '' }}
+        if: ${{ success() && env.TEAMS_WEBHOOK_URL == '' }}
         run: echo "TEAMS_WEBHOOK_URL is not set. Skipping Teams notification."
-
